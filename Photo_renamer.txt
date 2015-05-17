@@ -1,0 +1,54 @@
+#!C:\Strawberry\perl\bin
+# Copyright Matthew Cumming 2015
+
+###########################################
+ #        Iterative Photo Renamer        #
+###########################################
+
+use warnings;
+use strict;
+use Cwd 'abs_path';  			### Current Working Directory			
+use File::Copy;				### Platform Independant File Copying
+
+my $path = abs_path($0);
+$path = substr($path, 0, -(length($0)));		
+print "The working directory is currently: $path.\n";
+
+my $id_file = 'photo.csv';        	### Your id filename  
+
+print "The current id_file: $id_file.\n";
+
+my $filename = $path.$id_file;		### The file with the photo ranges in it
+
+if (! open PLANTS, $filename) {		### Get our Photo ID's from our document			
+	 die "Could not open file '$filename' $!";
+}
+
+my $i = 0;
+my @range;
+
+while (<PLANTS>) {						
+	my ($id, $low, $high, $treat) = split(/,/, $_, 5);   ### A list
+	$range[$i] = [$id, $low, $high, chomp($treat)];   ### An Array	
+	$i = $i + 1;
+}  
+close PLANTS;
+
+my @files = glob "*.jpg";
+
+$i = 0;
+foreach my $x (@files) {
+	my $match = substr($x, 5, 3); 
+	# print "$match\n";
+	if ($match >= $range[$i][1] and $match <= $range[$i][2]) {  ### check for bounds
+		my $newname = join('_', $range[$i][0], "$match.jpg");
+		copy($path.$x, "C:\\Users\\Matt\\Desktop\\Success\\$newname") or die "Copy Failed: $!";
+		$i = $i + 1;
+	}
+}
+	
+
+
+
+
+
